@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Infrastructure.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -7,10 +8,17 @@ using System.Threading.Tasks;
 
 namespace API.IDDOCS.Controllers
 {
+   
+
+
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
+        AppDbContext dbContext;
+
+        public WeatherForecastController(AppDbContext context) => dbContext = context;
+
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -20,6 +28,8 @@ namespace API.IDDOCS.Controllers
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
+            var allDocs = dbContext.Docs;
+
             _logger = logger;
         }
 
