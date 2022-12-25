@@ -11,37 +11,38 @@ namespace Infrastructure.Data
 {
     public class EfRepository : IRepository
     {
-        //private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _db;
 
-        //public EfRepository(AppDbContext dbContext)
-        //    => _dbContext = dbContext;
+        public EfRepository(AppDbContext context) => _db = context;
 
         public async Task<T> AddAsync<T>(T entity) where T : class, IBaseEntity
         {
-            using (var db = new AppDbContext())
-            {
-                await db.Set<T>().AddAsync(entity);
-                await db.SaveChangesAsync();
+            await _db.Set<T>().AddAsync(entity);
+            await _db.SaveChangesAsync();
 
-                return entity;
-            }
+            return entity;
         }
 
         public Task<T> Get<T>(Expression<Func<T, bool>> predicate) where T : class, IBaseEntity
         {
-            using (var db = new AppDbContext())
-            {
-                return db.Set<T>().SingleOrDefaultAsync(predicate);
-            }
+            return _db.Set<T>().SingleOrDefaultAsync(predicate);
         }
 
         public void Update<T>(T eintity) where T : class, IBaseEntity
         {
-            using(var db = new AppDbContext())
-            {
-                db.Set<T>().Update(eintity);
-                db.SaveChanges();
-            }
+            _db.Set<T>().Update(eintity);
+            _db.SaveChanges();
+        }
+
+        public IEnumerable<T> GetAll<T>(Expression<Func<T, bool>> predicate) where T : class, IBaseEntity
+        {
+            return _db.Set<T>().Where(predicate).ToList();
+        }
+
+        public Task DeleteAsync<T>(T entity) where T : class, IBaseEntity
+        {
+            _db.Set<T>().Remove(entity);
+            return _db.SaveChangesAsync();
         }
     }
 }

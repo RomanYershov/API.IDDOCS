@@ -18,17 +18,13 @@ namespace API.IDDOCS.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        AppDbContext _dbContext;
+        readonly EfRepository _db;
 
-        //public AccountController(AppDbContext dbContext) => _dbContext = dbContext;
+        public AccountController(EfRepository db) => _db = db;
 
 
-        private List<Client> clients = new List<Client>
-        {
-            new Client {IIN="820206302443", Password="12345" }
-        };
 
-        [HttpPost("/token")]
+        [HttpPost("/api/token")]
         public object Token(string iin, string password)
         {
             var identity = GetIdentity(iin, password);
@@ -39,30 +35,33 @@ namespace API.IDDOCS.Controllers
                 return BadRequest(new { errorText = "Invalid username or password." });
             }
 
-            var now = DateTime.UtcNow;
-            
-            var jwt = new JwtSecurityToken(
-                    issuer: AuthOptions.ISSUER,
-                    audience: AuthOptions.AUDIENCE,
-                    notBefore: now,
-                    claims: identity.Claims,
-                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-            var response = new
+            return GetToken(identity);
+        }
+
+
+        [HttpPost("/api/user/registration")]
+        public async Task<object> Create([FromBody] Client client)
+        {
+            client.ID = Guid.NewGuid();
+            client.CreatedAt = DateTime.Now;
+
+            await _db.AddAsync<Client>(client);
+
+            var identity = GetIdentity(client.IIN, client.Password);
+
+            if (identity == null)
             {
-                access_token = encodedJwt,
-                username = identity.Name
-            };
+                return BadRequest(new { errorText = "Invalid username or password." });
+            }
 
-            return response;
+            return GetToken(identity);
         }
 
 
         private ClaimsIdentity GetIdentity(string iin, string password)
         {
-            Client client = clients.FirstOrDefault(x => x.IIN == iin && x.Password == password);
+            Client client = _db.Get<Client>(x => x.IIN == iin && x.Password == password).Result;
             if (client != null)
             {
                 var claims = new List<Claim>
@@ -75,8 +74,30 @@ namespace API.IDDOCS.Controllers
                 return claimsIdentity;
             }
 
-           
+
             return null;
+        }
+
+        private object GetToken(ClaimsIdentity identity)
+        {
+            var now = DateTime.UtcNow;
+
+            var jwt = new JwtSecurityToken(
+                    issuer: AuthOptions.ISSUER,
+                    audience: AuthOptions.AUDIENCE,
+                    notBefore: now,
+                    claims: identity.Claims,
+                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+
+            var tokenObj = new
+            {
+                access_token = encodedJwt,
+                username = identity.Name
+            };
+
+            return tokenObj;
         }
     }
 }

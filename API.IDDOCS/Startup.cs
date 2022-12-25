@@ -42,7 +42,7 @@ namespace API.IDDOCS
             //    options.UseSqlServer(connectionString);
             //});
 
-            //services.AddSingleton<EfRepository>();
+            services.AddSingleton<AppDbContext>();
             services.AddSingleton<EfRepository>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
