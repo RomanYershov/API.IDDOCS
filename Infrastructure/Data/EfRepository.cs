@@ -33,7 +33,12 @@ namespace Infrastructure.Data
             _db.Set<T>().Update(eintity);
             _db.SaveChanges();
         }
-
+        /// <summary>
+        /// Получить полный список
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <returns>IEnumerable T</returns>
         public IEnumerable<T> GetAll<T>(Expression<Func<T, bool>> predicate) where T : class, IBaseEntity
         {
             return _db.Set<T>().Where(predicate).ToList();

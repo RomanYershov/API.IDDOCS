@@ -31,12 +31,16 @@ namespace API.IDDOCS.Controllers
 
 
 
-
+        //И автор, и получатель документа могут запрашивать список документов по API,
+        //при этом имеется фильтрация документов по дате создания
         [Authorize]
-        [HttpGet("/api/docs/all/{ownerId}")]
-        public IEnumerable<IdDoc> GetAll(Guid ownerId)
+        [HttpGet("/api/docs/list")]
+        public IEnumerable<IdDoc> GetAll()
         {
-            var docs = _db.GetAll<IdDoc>(x => x.CreatedUserId == ownerId);
+            var curentUserId = _db.Get<Client>(x => x.IIN == User.Identity.Name).Result.ID;
+
+            var docs = _db.GetAll<IdDoc>(x => x.CreatedUserId == curentUserId || x.ReceiverUserId == curentUserId)
+                .OrderByDescending(x => x.CreatedDate);
             return docs;
         }
 
@@ -47,14 +51,14 @@ namespace API.IDDOCS.Controllers
         [HttpPost("/api/docs/add")]
         public async Task<HttpResponce> Add([FromBody] IdDocDTO dto)
         {
-            var createdUserId = _db.Get<Client>(x => x.IIN == User.Identity.Name).Result.ID;
+            var curentUserId = _db.Get<Client>(x => x.IIN == User.Identity.Name).Result.ID;
 
             IdDoc newDoc = new IdDoc 
             {
               ID = dto.ID,
               Content = dto.Content,
               CreatedDate = DateTime.Now,
-              CreatedUserId = createdUserId,
+              CreatedUserId = curentUserId,
               Name = dto.Name,
               ReceiverUserId = dto.ReceiverUserId,
               Type = dto.Type
