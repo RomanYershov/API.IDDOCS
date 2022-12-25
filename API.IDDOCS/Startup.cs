@@ -1,3 +1,4 @@
+using Domain.Common;
 using Infrastructure.Configurations;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,9 +38,12 @@ namespace API.IDDOCS
 
             string connectionString = Configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<AppDbContext>(options => {
-                options.UseSqlServer(connectionString);
-            });
+            //services.AddDbContext<AppDbContext>(options => {
+            //    options.UseSqlServer(connectionString);
+            //});
+
+            //services.AddSingleton<EfRepository>();
+            services.AddSingleton<EfRepository>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Domain.Entities;
+using Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,32 +15,38 @@ namespace API.IDDOCS.Controllers
     [ApiController]
     public class DocsController : ControllerBase
     {
-        // GET: api/<DocsController>
+        private readonly EfRepository _db;
+        public DocsController(EfRepository db) => _db = db;
+       
         [Authorize]
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("/api/docs/get/{id}")]
+        public IdDoc GetDoc(Guid id)
         {
-            return new string[] { "value1", "value2" };
+            return _db.Get<IdDoc>(x => x.Number == id).Result;
         }
 
-        // GET api/<DocsController>/5
+
+
+
+
         [Authorize]
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpPost("/api/docs/add")]
+        public async Task<IdDoc> Add([FromBody] IdDoc doc)
         {
-            return "value";
+            var user = HttpContext;
+
+            return await _db.AddAsync<IdDoc>(doc);
         }
 
-        // POST api/<DocsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
 
-        // PUT api/<DocsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+
+
+
+        [Authorize]
+        [HttpPut("/api/docs/update")]
+        public void Put([FromBody] IdDoc doc)
         {
+            _db.Update<IdDoc>(doc);
         }
 
         // DELETE api/<DocsController>/5
