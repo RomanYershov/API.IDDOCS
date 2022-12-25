@@ -10,6 +10,8 @@ namespace Domain.Entities
     {
         [Key]
         public Guid ID { get; set; }
-        public String Name { get; set; }
+        public String FileName { get; set; }
+        public byte[] Content { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }
