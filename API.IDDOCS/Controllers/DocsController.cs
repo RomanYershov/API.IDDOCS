@@ -12,6 +12,7 @@ using Domain.Extentions;
 
 namespace API.IDDOCS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DocsController : ControllerBase
@@ -23,7 +24,7 @@ namespace API.IDDOCS.Controllers
 
 
 
-        [Authorize]
+        
         [HttpGet("/api/docs/get/{id}")]
         public IdDoc GetDoc(Guid id)
         {
@@ -34,7 +35,7 @@ namespace API.IDDOCS.Controllers
 
         //И автор, и получатель документа могут запрашивать список документов по API,
         //при этом имеется фильтрация документов по дате создания
-        [Authorize]
+        
         [HttpGet("/api/docs/list")]
         public IEnumerable<IdDoc> GetAll()
         {
@@ -48,7 +49,7 @@ namespace API.IDDOCS.Controllers
 
 
 
-        [Authorize]
+        
         [HttpPost("/api/docs/add")]
         public async Task<HttpResponce> Add([FromBody] IdDocDTO dto)
         {
@@ -73,7 +74,7 @@ namespace API.IDDOCS.Controllers
 
 
 
-        [Authorize]
+        
         [HttpPut("/api/docs/update")]
         public object Put([FromBody] IdDocDTO dto)
         {
@@ -99,7 +100,7 @@ namespace API.IDDOCS.Controllers
 
 
 
-        [Authorize]
+        
         [HttpDelete("/api/docs/remove/{id}")]
         public object Delete(Guid id)
         {
@@ -116,7 +117,10 @@ namespace API.IDDOCS.Controllers
             return BadRequest(new HttpResponce { IsSuccess = false, Error = "Изменять контент документа, удалять документ может только автор документа" });
         }
 
-        [Authorize]
+
+
+
+        
         [HttpGet("/api/docs/download/{id}")]
         public FileContentResult Download(Guid id)
         {
@@ -125,6 +129,21 @@ namespace API.IDDOCS.Controllers
             var result = doc.ToExcel();
 
             return result;
+        }
+
+
+
+
+        
+        [HttpGet("/api/docs/download")]
+        public FileContentResult Download()
+        {
+            var curentUserId = _db.Get<Client>(x => x.IIN == User.Identity.Name).Result.ID;
+
+            var docs = _db.GetAll<IdDoc>(x => x.CreatedUserId == curentUserId || x.ReceiverUserId == curentUserId)
+                .OrderByDescending(x => x.CreatedDate);
+
+            return docs.ToList().ToExcel();
         }
     }
 }
