@@ -22,7 +22,7 @@ namespace Domain.Extentions
                 
                 worksheet.Row(1).Style.Font.Bold = true;
 
-                Set(worksheet, doc, 0);
+                SetCells(worksheet, doc, 0);
 
 
                 using (var stream = new MemoryStream())
@@ -50,7 +50,7 @@ namespace Domain.Extentions
                 worksheet.Row(1).Style.Font.Bold = true;
 
                 for(int i = 0; i < docs.Count; i++)
-                    Set(worksheet, docs[i], i);
+                    SetCells(worksheet, docs[i], i);
 
 
                 using (var stream = new MemoryStream())
@@ -89,7 +89,7 @@ namespace Domain.Extentions
             return description;
         }
 
-        private static void Set(IXLWorksheet worksheet, IdDoc doc, int index)
+        private static void SetCells(IXLWorksheet worksheet, IdDoc doc, int index)
         {
             worksheet.Cell(index + 2, 1).Value = doc.ID.ToString();
             worksheet.Cell(index + 2, 2).Value = doc.Name;
