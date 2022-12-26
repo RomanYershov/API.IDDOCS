@@ -19,6 +19,7 @@ namespace Domain.Extentions
                 worksheet.Cell("A1").Value = "ID";
                 worksheet.Cell("B1").Value = "Name";
                 worksheet.Cell("C1").Value = "Type";
+                worksheet.Cell("D1").Value = "Date";
                 
                 worksheet.Row(1).Style.Font.Bold = true;
 
@@ -46,6 +47,7 @@ namespace Domain.Extentions
                 worksheet.Cell("A1").Value = "ID";
                 worksheet.Cell("B1").Value = "Name";
                 worksheet.Cell("C1").Value = "Type";
+                worksheet.Cell("D1").Value = "Date";
 
                 worksheet.Row(1).Style.Font.Bold = true;
 
@@ -94,6 +96,7 @@ namespace Domain.Extentions
             worksheet.Cell(index + 2, 1).Value = doc.ID.ToString();
             worksheet.Cell(index + 2, 2).Value = doc.Name;
             worksheet.Cell(index + 2, 3).Value = doc.Type.DocTypeDescription();
+            worksheet.Cell(index + 2, 4).Value = doc.CreatedDate.ToShortDateString();
         }
     }
 }
