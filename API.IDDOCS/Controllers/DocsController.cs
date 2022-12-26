@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Extentions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -113,6 +114,17 @@ namespace API.IDDOCS.Controllers
             }
 
             return BadRequest(new HttpResponce { IsSuccess = false, Error = "Изменять контент документа, удалять документ может только автор документа" });
+        }
+
+        [Authorize]
+        [HttpGet("/api/docs/download/{id}")]
+        public FileContentResult Download(Guid id)
+        {
+            var doc = _db.Get<IdDoc>(x => x.ID == id).Result;
+
+            var result = doc.ToExcel();
+
+            return result;
         }
     }
 }
